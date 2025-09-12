@@ -229,154 +229,161 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
   const renderPicker = () =>
     ReactDOM.createPortal(
-      <Popover
-        ref={popoverRef}
-        className="color-picker-popover"
-        style={{
-          ...(picker === "Custom"
-            ? {
-                maxHeight: popoverPosition.maxHeight,
-                overflowY: "auto",
-                overflowX: "hidden",
-              }
-            : {}),
-          ...(picker === "Slider"
-            ? {
-                width: "250px",
-                backgroundColor: "white",
-                padding: "10px",
-                borderRadius: "10px",
-              }
-            : {}),
-          ...(picker === "Circle"
-            ? {
-                backgroundColor: "white",
-                padding: "10px",
-                borderRadius: "10px",
-              }
-            : {}),
-          position: "absolute",
-          zIndex: 99999,
-          top: popoverPosition.top,
-          bottom: popoverPosition.bottom,
-          left: popoverPosition.left,
-        }}
-      >
+      <>
         <OnPress
           onPress={handleCancel}
-          style={{ position: "fixed", top: 0, right: 0, bottom: 0, left: 0 }}
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            width: "100vw",
+            height: "100vh",
+            zIndex: 99999,
+            backgroundColor: styles.color.neutral[500],
+            opacity: 0.75,
+          }}
         />
-        <>
-          {!showDetailedPicker ? (
-            <Row
-              justifyContent="space-between"
-              alignItems="center"
-              gap="10px"
-              rowDirection="column"
-            >
-              <Row>
-                <Button
-                  dimensions={{ width: "100%" }}
-                  type="button"
-                  role="action"
-                  onPress={() => setShowDetailedPicker(true)}
-                >
-                  Show Picker
-                </Button>
+        <Popover
+          ref={popoverRef}
+          className="color-picker-popover"
+          style={{
+            ...(picker === "Custom"
+              ? {
+                  maxHeight: popoverPosition.maxHeight,
+                  overflowY: "auto",
+                  overflowX: "hidden",
+                }
+              : {}),
+            ...(picker === "Slider"
+              ? {
+                  width: "250px",
+                  backgroundColor: "white",
+                  padding: "10px",
+                  borderRadius: "10px",
+                }
+              : {}),
+            ...(picker === "Circle"
+              ? {
+                  backgroundColor: "white",
+                  padding: "10px",
+                  borderRadius: "10px",
+                }
+              : {}),
+            position: "absolute",
+            zIndex: 99999,
+            top: popoverPosition.top,
+            bottom: popoverPosition.bottom,
+            left: popoverPosition.left,
+          }}
+        >
+          <>
+            {!showDetailedPicker ? (
+              <Row
+                justifyContent="space-between"
+                alignItems="center"
+                gap="10px"
+                rowDirection="column"
+              >
+                <Row>
+                  <Button
+                    dimensions={{ width: "100%" }}
+                    type="button"
+                    role="action"
+                    onPress={() => setShowDetailedPicker(true)}
+                  >
+                    Show Picker
+                  </Button>
+                </Row>
+                <CirclePicker
+                  style={{ display: "flex", justifyContent: "center" }}
+                  color={tempColor?.hex ?? color?.hex ?? defaultValue ?? value}
+                  colors={colors}
+                  onChange={(color: ColorResult) => {
+                    const newColor =
+                      typeof color === "string"
+                        ? hexToColorResult(color)
+                        : color;
+                    setTempColor(newColor);
+                    onChange?.(newColor);
+                  }}
+                  rectProps={{
+                    style: {
+                      borderRadius: 2,
+                      width: 18,
+                      height: 18,
+                    },
+                  }}
+                  pointProps={{
+                    style: {
+                      width: 26,
+                      height: 26,
+                      borderRadius: 5,
+                      border: styles.surface.border.default.solidDarkThin,
+                    },
+                  }}
+                />
+                <ButtonGroups>
+                  <Button
+                    role="cancel"
+                    onPress={handleCancel}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onPress={handleAccept} style={{ cursor: "pointer" }}>
+                    Accept
+                  </Button>
+                </ButtonGroups>
               </Row>
-              <CirclePicker
-                style={{ display: "flex", justifyContent: "center" }}
-                color={tempColor?.hex ?? color?.hex ?? defaultValue ?? value}
-                colors={colors}
-                onChange={(color: ColorResult) => {
-                  const newColor =
-                    typeof color === "string" ? hexToColorResult(color) : color;
-                  setTempColor(newColor);
-                  onChange?.(newColor);
-                }}
-                rectProps={{
-                  style: {
-                    borderRadius: 2,
-                    width: 18,
-                    height: 18,
-                  },
-                }}
-                pointProps={{
-                  style: {
-                    width: 26,
-                    height: 26,
-                    borderRadius: 5,
-                    border: styles.surface.border.default.solidDarkThin,
-                  },
-                }}
-              />
-              <ButtonGroups>
-                <Button
-                  type="button"
-                  role="action"
-                  onPress={handleCancel}
-                  style={{ cursor: "pointer" }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  role="action"
-                  onPress={handleAccept}
-                  style={{ cursor: "pointer" }}
-                >
-                  Accept
-                </Button>
-              </ButtonGroups>
-            </Row>
-          ) : (
-            <Row rowDirection="column">
-              <Controls>
-                <Button
-                  dimensions={{ width: "100%" }}
-                  type="button"
-                  role="action"
-                  onPress={() => setShowDetailedPicker(false)}
-                >
-                  Show Swatches
-                </Button>
-              </Controls>
-              <Colorful
-                style={{
-                  width: "calc(100% - 30px)",
-                  padding: "15px",
-                  paddingTop: "0",
-                  paddingBottom: "0",
-                }}
-                disableAlpha={true}
-                color={tempColor?.hex ?? color?.hex}
-                onChange={(color: ColorResult) => {
-                  onChange?.(color);
-                  setTempColor(color);
-                }}
-              />
+            ) : (
+              <Row rowDirection="column">
+                <Controls>
+                  <Button
+                    dimensions={{ width: "100%" }}
+                    type="button"
+                    role="action"
+                    onPress={() => setShowDetailedPicker(false)}
+                  >
+                    Show Swatches
+                  </Button>
+                </Controls>
+                <Colorful
+                  style={{
+                    width: "calc(100% - 30px)",
+                    padding: "15px",
+                    paddingTop: "0",
+                    paddingBottom: "0",
+                  }}
+                  disableAlpha={true}
+                  color={tempColor?.hex ?? color?.hex}
+                  onChange={(color: ColorResult) => {
+                    onChange?.(color);
+                    setTempColor(color);
+                  }}
+                />
 
-              <ButtonGroups>
-                <Button
-                  type="button"
-                  role="cancel"
-                  onPress={handleCancel}
-                  style={{ cursor: "pointer" }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  onPress={handleAccept}
-                  style={{ cursor: "pointer" }}
-                >
-                  Accept
-                </Button>
-              </ButtonGroups>
-            </Row>
-          )}
-        </>
-      </Popover>,
+                <ButtonGroups>
+                  <Button
+                    type="button"
+                    role="cancel"
+                    onPress={handleCancel}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onPress={handleAccept}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Accept
+                  </Button>
+                </ButtonGroups>
+              </Row>
+            )}
+          </>
+        </Popover>
+      </>,
       document.body
     );
 
