@@ -1,3 +1,5 @@
+export * from "./style";
+
 export type Role =
   | "primary"
   | "secondary"

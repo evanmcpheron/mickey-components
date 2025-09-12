@@ -1,0 +1,127 @@
+import React, { useRef } from "react";
+
+import { StyledIcon } from "./shared/icon.styled";
+import type { IconProps } from "./shared/icon.types";
+import type { MickeyObject } from "@/helpers/types/base.types";
+import type { Dimensions } from "@/helpers/types/style.types";
+import { usePointerEvent } from "@/helpers/hooks/usePointerEvent.hook";
+import { removeUndefined } from "@/helpers/objects";
+
+export const HeadSideIcon: React.FC<
+  IconProps & {
+    type: "solid" | "regular" | "light" | "thin" | "duotone" | Dimensions;
+  }
+> = ({ type, size, color, active, className, style, ...more }) => {
+  const domRef: MickeyObject = useRef(null);
+
+  const { onPress, onOut, onMove, onUp, onDown, onOver, groupId } = more;
+  const pointerEvents = {
+    onPress,
+    onOut,
+    onMove,
+    onUp,
+    onDown,
+    onOver,
+    groupId,
+  };
+
+  usePointerEvent({ element: domRef, active: active, ...pointerEvents });
+
+  const internalProperties = removeUndefined({
+    className,
+    style: { ...(style || {}) },
+    active,
+    size,
+    color,
+  });
+
+  return (
+    <StyledIcon ref={domRef} {...internalProperties}>
+      {(() => {
+        switch (type) {
+          case "solid":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-foreground"
+                  d="M0 224.2C0 100.6 100.2 0 224 0h24c95.2 0 181.2 69.3 197.3 160.2 2.3 13 6.8 25.7 15.1 36l42 52.6c6.2 7.8 9.6 17.4 9.6 27.4 0 24.2-19.6 43.8-43.8 43.8H448v64c0 35.3-28.7 64-64 64h-64v32c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32v-72.7c0-16.7-6.9-32.5-17.1-45.8C16.6 322.4 0 274.1 0 224.2m352-.2a32 32 0 1 0 0-64 32 32 0 1 0 0 64"
+                />
+              </svg>
+            );
+
+          case "regular":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-foreground"
+                  d="M48 224c0-97.2 78.8-176 176-176h24c60.1 0 115.7 36.7 139.6 88.3 3.9 8.4 7.5 17 11.4 25.9l1.5 3.5c4.3 10.1 8.9 20.7 13.9 31.1 10.1 20.8 22.5 42 40.6 60.1l4.4 4.4c2.9 2.9 4.6 6.9 4.6 11 0 8.6-7 15.6-15.6 15.6H424c-13.3 0-24 10.7-24 24v72c0 8.8-7.2 16-16 16h-88c-13.3 0-24 10.7-24 24v64c0 13.3 10.7 24 24 24s24-10.7 24-24V448h64c35.3 0 64-28.7 64-64v-48h.4c35.1 0 63.6-28.5 63.6-63.6 0-16.9-6.7-33-18.6-45L489 223c-12.7-12.7-22.4-28.5-31.4-47.1-4.5-9.3-8.7-18.9-13-29l-1.5-3.5c-3.8-8.9-7.8-18.2-12-27.3C399.4 47.6 326.8 0 248 0h-24C100.3 0 0 100.3 0 224c0 53.6 18.9 102.9 50.3 141.5 8.9 11 13.7 22.4 13.7 33.1V488c0 13.3 10.7 24 24 24s24-10.7 24-24v-89.4c0-24.9-10.9-46.8-24.5-63.4C62.8 304.8 48 266.2 48 224m288 0a32 32 0 1 0 0-64 32 32 0 1 0 0 64"
+                />
+              </svg>
+            );
+
+          case "light":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-foreground"
+                  d="M32 224c0-106 86-192 192-192h16c66.1 0 127.1 40 153.8 96.9 3.2 6.9 6.5 14.2 9.9 21.7 6.2 13.9 12.7 28.5 19.8 42 11.1 21.3 24.8 42.3 44 59.4l3.2 2.8c6 5.3 9.5 13 9.5 21.1 0 15.6-12.6 28.2-28.2 28.2h-20c-8.8 0-16 7.2-16 16v64c0 17.7-14.3 32-32 32h-80c-8.8 0-16 7.2-16 16v64c0 8.8 7.2 16 16 16s16-7.2 16-16V448h64c35.3 0 64-28.7 64-64v-48h3.8c33.2 0 60.2-26.9 60.2-60.2 0-17.2-7.4-33.6-20.2-45l-3.2-2.8c-15.1-13.5-26.6-30.6-36.9-50.3-6.7-12.7-12.3-25.5-18.2-38.7-3.5-7.8-7-15.7-10.8-23.8C390.8 47.3 318.6 0 240 0h-16C100.3 0 0 100.3 0 224c0 52.9 18.4 101.6 49.1 140 9.4 11.6 14.9 24.6 14.9 37.4V496c0 8.8 7.2 16 16 16s16-7.2 16-16v-94.6c0-22.1-9.5-41.9-21.9-57.4C47.7 311.1 32 269.4 32 224m312 0a24 24 0 1 0 0-48 24 24 0 1 0 0 48"
+                />
+              </svg>
+            );
+
+          case "thin":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-foreground"
+                  d="M16 222.9C16 108.6 108.6 16 222.9 16h16.8c71.6 0 137.5 43.3 166.4 105 3.5 7.4 6.9 15.1 10.4 22.9 6.4 14.3 12.9 28.9 20.1 42.7 11.3 21.6 24.8 42.2 43.5 58.9l3.8 3.4c7.7 6.9 12.1 16.7 12.1 27 0 20-16.2 36.2-36.2 36.2H440c-4.4 0-8 3.6-8 8v72c0 22.1-17.9 40-40 40h-80c-4.4 0-8 3.6-8 8v64c0 4.4 3.6 8 8 8s8-3.6 8-8V448h72c30.9 0 56-25.1 56-56v-64h11.8c28.8 0 52.2-23.4 52.2-52.2 0-14.9-6.4-29.1-17.5-39l-3.8-3.4c-16.7-14.9-29.2-33.6-40-54.4-7-13.4-13.1-27.1-19.3-41-3.5-7.9-7.1-15.9-10.8-23.9C389.1 46.9 317.6 0 239.7 0h-16.8C99.8 0 0 99.8 0 222.9c0 52.8 16.9 101.5 47.4 139.9C57.5 375.5 64 390.2 64 405.3V504c0 4.4 3.6 8 8 8s8-3.6 8-8v-98.7c0-19.8-8.5-37.8-20.1-52.4-28.1-35.4-43.9-80.6-43.9-130m320 1.1a16 16 0 1 0 0-32 16 16 0 1 0 0 32"
+                />
+              </svg>
+            );
+
+          case "duotone":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-background"
+                  d="M0 224.2C0 100.6 100.2 0 224 0h24c95.2 0 181.2 69.3 197.3 160.2 2.3 13 6.8 25.7 15.1 36l42 52.6c6.2 7.8 9.6 17.4 9.6 27.4 0 24.2-19.6 43.8-43.8 43.8H448v64c0 35.3-28.7 64-64 64h-64v32c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32v-72.7c0-16.7-6.9-32.5-17.1-45.8C16.6 322.4 0 274.1 0 224.2m352-.2a32 32 0 1 0 0-64 32 32 0 1 0 0 64"
+                />
+                <path
+                  className="aps-icon-foreground"
+                  d="M320 192a32 32 0 1 1 64 0 32 32 0 1 1-64 0"
+                />
+              </svg>
+            );
+
+          default:
+            return null;
+        }
+      })()}
+    </StyledIcon>
+  );
+};

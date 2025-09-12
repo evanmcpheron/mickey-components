@@ -1,57 +1,52 @@
-import { useState } from "react";
 import {
-  copyToClipboard,
-  generateRandomString,
-  generateRandomWords,
-} from "./helpers/dictionary";
-import { ThemeSwitcher, Button, Radio, TextField } from "@components";
+  ThemeSwitcher,
+  ColorThemeSwitcher,
+  Row,
+  Label,
+  Card,
+  Button,
+} from "@components";
+import { useEffect, useRef } from "react";
+import { localStorageKeys, ROOT } from "./helpers/consts";
+import { Test } from "./test";
 
 function App() {
-  const [password, setPassword] = useState("");
-  const [type, setType] = useState<"CHAR" | "WORD">("WORD");
-
-  const updatePassword = async () => {
-    const generatedPassword =
-      type === "WORD"
-        ? await generateRandomWords({
-            length: 3,
-            useCapitalLetters: true,
-            useDigits: true,
-          })
-        : generateRandomString({ length: 20 });
-
-    setPassword(generatedPassword);
-  };
-
-  const handleCopyPassword = () => {
-    copyToClipboard(password).then((copySuccess) => {
-      if (copySuccess) {
-        console.log("SUCCESSFULLY COPIES TO CLIPBOARD");
-        return;
-      }
-      console.log("something went wrong copying to clipboard.");
-      return;
-    });
-  };
+  const testRef = useRef<{
+    submitData: (callback: (success: boolean) => void) => void;
+  }>(null);
+  useEffect(() => {
+    const colorScheme =
+      localStorage.getItem(localStorageKeys.COLOR_SCHEME_KEY) || "default";
+    ROOT.setAttribute("data-color-scheme", colorScheme);
+  }, []);
   return (
-    <div>
-      <ThemeSwitcher />
-      <Radio
-        value={type}
-        spacing="space-around"
-        onChange={(val: string) => {
-          setPassword("");
-          setType(val as "CHAR" | "WORD");
-        }}
-      >
-        <Radio.Option value="CHAR">Character</Radio.Option>
-        <Radio.Option value="WORD">Word</Radio.Option>
-      </Radio>
-
-      <Button onPress={updatePassword}>Generate</Button>
-      {password && <Button onPress={handleCopyPassword}>{password}</Button>}
-      <TextField label="testing" />
-    </div>
+    <Card
+      header={{ primary: "Primary", secondary: "Secondary" }}
+      body={
+        <Row rowDirection="column" gap="10px">
+          <ThemeSwitcher />
+          <ColorThemeSwitcher />
+          <Label>TEST FORM</Label>
+          <Test ref={testRef} />
+        </Row>
+      }
+      footer={
+        <Row justifyContent="space-between">
+          <Button role="cancel">Cancel</Button>
+          <Button
+            onPress={() => {
+              if (testRef.current) {
+                testRef.current.submitData((success: boolean) => {
+                  console.log("success: ", success);
+                });
+              }
+            }}
+          >
+            Save
+          </Button>
+        </Row>
+      }
+    />
   );
 }
 

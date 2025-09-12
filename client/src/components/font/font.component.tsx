@@ -1,126 +1,128 @@
-// Font.tsx
-import React, {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ElementType,
-} from "react";
-import { StyledFont } from "./font.styled";
+import React, { useRef } from "react";
+import type { FontProperties } from "./font.types";
 
-type AsProp<C extends ElementType> = { as?: C };
-type PropsToOmit<C extends ElementType, P> = keyof (AsProp<C> & P);
+import {
+  BodyContainer,
+  H1Container,
+  H2Container,
+  H3Container,
+  H4Container,
+  H5Container,
+  H6Container,
+  LeadContainer,
+  NormalizeLabels,
+  SmallContainer,
+} from "./font.styled";
+import type { MickeyObject } from "@/helpers/types/base.types";
+import { usePointerEvent } from "@/helpers/hooks/usePointerEvent.hook";
+import { removeUndefined } from "@/helpers/objects";
+import { Switch } from "../misc";
+import { styles } from "@/helpers";
 
-export type PolymorphicComponentProp<C extends ElementType, Props> = Props &
-  AsProp<C> &
-  Omit<ComponentPropsWithoutRef<C>, PropsToOmit<C, Props>>;
+const Font: React.FC<FontProperties> = ({
+  children,
+  style,
+  className,
+  active,
+  font,
+  fontType,
+  color,
+  size,
+  weight,
+  display,
+  lineHeight,
+  ...more
+}) => {
+  const domRef: MickeyObject = useRef(null);
+  const extraProps: MickeyObject = more;
 
-export type PolymorphicRef<C extends ElementType> =
-  ComponentPropsWithoutRef<C>["ref"];
+  const { onPress, onOut, onMove, onUp, onDown, onOver, groupId } = extraProps;
+  const pointerEvents = {
+    onPress,
+    onOut,
+    onMove,
+    onUp,
+    onDown,
+    onOver,
+    groupId,
+  };
 
-export type FontVariant =
-  | "h1"
-  | "h2"
-  | "h3"
-  | "h4"
-  | "h5"
-  | "h6"
-  | "subtitle1"
-  | "subtitle2"
-  | "body1"
-  | "body2"
-  | "button"
-  | "caption"
-  | "overline";
+  usePointerEvent({ element: domRef, active: active, ...pointerEvents });
 
-export type FontAlign = "inherit" | "left" | "center" | "right" | "justify";
-export type FontTone =
-  | "inherit"
-  | "primary"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "error"
-  | "info"
-  | "muted";
-export type FontWeight = number | "light" | "regular" | "medium" | "bold";
-
-type FontOwnProps = {
-  variant?: FontVariant;
-  align?: FontAlign;
-  gutterBottom?: boolean;
-  paragraph?: boolean;
-  noWrap?: boolean;
-  clamp?: number;
-  tone?: FontTone;
-  weight?: FontWeight;
-  uppercase?: boolean;
-  children?: React.ReactNode;
-};
-
-// Default element is "span"
-export type FontProps<C extends ElementType> = PolymorphicComponentProp<
-  C,
-  FontOwnProps
->;
-
-const defaultComponentByVariant = {
-  h1: "h1",
-  h2: "h2",
-  h3: "h3",
-  h4: "h4",
-  h5: "h5",
-  h6: "h6",
-  subtitle1: "h6",
-  subtitle2: "h6",
-  body1: "p",
-  body2: "p",
-  button: "span",
-  caption: "span",
-  overline: "span",
-};
-
-// Define a callable polymorphic component type
-type FontComponent = <C extends ElementType = "span">(
-  props: FontProps<C> & { ref?: PolymorphicRef<C> }
-) => React.ReactElement | null;
-
-const FontInner = <C extends ElementType = "span">(
-  {
-    as,
-    variant = "body1",
-    align = "inherit",
-    gutterBottom = false,
-    paragraph = false,
-    noWrap = false,
-    clamp,
-    tone = "inherit",
+  const internalProperties = removeUndefined({
+    className: `mickey-font ${className ? className : ""}`,
+    style: { ...(style || {}) },
+    active,
+    font,
+    fontType,
+    color: color ? color : styles.text.primary,
+    size,
     weight,
-    uppercase = false,
-    children,
-    ...rest
-  }: FontProps<C>,
-  ref: PolymorphicRef<C>
-) => {
-  const Component =
-    (as as C) || ((paragraph ? "p" : defaultComponentByVariant[variant]) as C);
+    lineHeight,
+    display,
+  });
 
   return (
-    <StyledFont
-      as={Component as any}
-      ref={ref as any}
-      $variant={variant}
-      $align={align}
-      $gutterBottom={gutterBottom}
-      $paragraph={paragraph}
-      $noWrap={noWrap}
-      $clamp={clamp}
-      $tone={tone}
-      $weight={weight}
-      $uppercase={uppercase}
-      {...rest}
-    >
-      {children}
-    </StyledFont>
+    <NormalizeLabels>
+      <Switch>
+        <Switch.Case condition={!fontType}>
+          <BodyContainer ref={domRef} {...internalProperties}>
+            {children}
+          </BodyContainer>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "h1"}>
+          <H1Container ref={domRef} {...internalProperties}>
+            {children}
+          </H1Container>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "h2"}>
+          <H2Container ref={domRef} {...internalProperties}>
+            {children}
+          </H2Container>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "h3"}>
+          <H3Container ref={domRef} {...internalProperties}>
+            {children}
+          </H3Container>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "h4"}>
+          <H4Container ref={domRef} {...internalProperties}>
+            {children}
+          </H4Container>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "h5"}>
+          <H5Container ref={domRef} {...internalProperties}>
+            {children}
+          </H5Container>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "h6"}>
+          <H6Container ref={domRef} {...internalProperties}>
+            {children}
+          </H6Container>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "lead"}>
+          <LeadContainer ref={domRef} {...internalProperties}>
+            {children}
+          </LeadContainer>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "body"}>
+          <BodyContainer ref={domRef} {...internalProperties}>
+            {children}
+          </BodyContainer>
+        </Switch.Case>
+        <Switch.Case condition={fontType === "small"}>
+          <SmallContainer ref={domRef} {...internalProperties}>
+            {children}
+          </SmallContainer>
+        </Switch.Case>
+        <Switch.Default>
+          <BodyContainer ref={domRef} {...internalProperties}>
+            {children}
+          </BodyContainer>
+        </Switch.Default>
+      </Switch>
+    </NormalizeLabels>
   );
 };
 
-export const Font = forwardRef(FontInner) as FontComponent;
+export { Font as Label };

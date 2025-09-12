@@ -1,5 +1,6 @@
 import styled, { css } from "styled-components";
 import type { CardProps } from "./card.component";
+import { styles } from "@/helpers";
 
 const toSpace = (v?: number | string) =>
   v === undefined ? undefined : typeof v === "number" ? `var(--space-${v})` : v;
@@ -30,10 +31,10 @@ export const StyledCard = styled.div<CardProps>`
   position: relative;
   display: block;
 
-  background: var(--card-bg);
-  color: var(--text-primary);
+  background: ${styles.color.neutral[100]};
+  color: ${styles.text.primary};
   border-radius: ${({ radius }) => toRadius(radius)};
-  overflow: hidden; /* clip children to radius */
+  overflow: hidden;
 
   ${({ fullWidth }) => !fullWidth && "width: fit-content"};
 
@@ -91,7 +92,9 @@ export const StyledCard = styled.div<CardProps>`
 `;
 
 export const StyledCardHeader = styled.div`
-  border-bottom: 1px solid var(--primary-main);
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid ${styles.color.primary.main};
   padding: 0 var(--space-1);
   margin-bottom: var(--space-1);
 `;
@@ -101,7 +104,7 @@ export const StyledCardBody = styled.div`
 `;
 
 export const StyledCardFooter = styled.div`
-  border-top: 1px solid var(--primary-main);
+  border-top: 1px solid ${styles.color.primary.main};
   padding-top: var(--space-1);
   margin-top: var(--space-1);
 `;

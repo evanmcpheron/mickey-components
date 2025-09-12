@@ -1,0 +1,61 @@
+import React, { useRef } from "react";
+
+import { StyledIcon } from "./shared/icon.styled";
+import type { IconProps } from "./shared/icon.types";
+import type { MickeyObject } from "@/helpers/types/base.types";
+import type { Dimensions } from "@/helpers/types/style.types";
+import { usePointerEvent } from "@/helpers/hooks/usePointerEvent.hook";
+import { removeUndefined } from "@/helpers/objects";
+
+export const SquareFontAwesomeStrokeIcon: React.FC<
+  IconProps & { type: "brands" | Dimensions }
+> = ({ type, size, color, active, className, style, ...more }) => {
+  const domRef: MickeyObject = useRef(null);
+
+  const { onPress, onOut, onMove, onUp, onDown, onOver, groupId } = more;
+  const pointerEvents = {
+    onPress,
+    onOut,
+    onMove,
+    onUp,
+    onDown,
+    onOver,
+    groupId,
+  };
+
+  usePointerEvent({ element: domRef, active: active, ...pointerEvents });
+
+  const internalProperties = removeUndefined({
+    className,
+    style: { ...(style || {}) },
+    active,
+    size,
+    color,
+  });
+
+  return (
+    <StyledIcon ref={domRef} {...internalProperties}>
+      {(() => {
+        switch (type) {
+          case "brands":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 448 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-foreground"
+                  d="M64 64c-17.7 0-32 14.3-32 32v320c0 17.7 14.3 32 32 32h320c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32zM0 96c0-35.3 28.7-64 64-64h320c35.3 0 64 28.7 64 64v320c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64zm154 58c0 9.3-4.8 17.4-12.1 22h188.9c7.3 0 13.2 5.9 13.2 13.2 0 1.8-.4 3.7-1.1 5.4L312 264l30.9 69.4c.8 1.7 1.1 3.5 1.1 5.4 0 7.3-5.9 13.2-13.2 13.2H144v32h-32V174.5c-6.1-4.8-10-12.2-10-20.5 0-14.4 11.6-26 26-26s26 11.6 26 26"
+                />
+              </svg>
+            );
+
+          default:
+            return null;
+        }
+      })()}
+    </StyledIcon>
+  );
+};

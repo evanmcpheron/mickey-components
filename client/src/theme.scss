@@ -1,0 +1,323 @@
+// theme.scss
+@use "sass:color";
+@use "sass:map";
+@use "sass:list";
+
+// -----------------------------------------------------------------------------
+// BASE CONSTANTS
+// -----------------------------------------------------------------------------
+
+$color-white: #f0f0f0; // your "white" endpoint
+$color-black: #0b0b0b; // your "black" endpoint
+
+// -----------------------------------------------------------------------------
+// HELPER FUNCTIONS
+// -----------------------------------------------------------------------------
+
+// Lighten a color by mixing with $color-white
+@function mix-with-light($color, $percent) {
+  @return color.mix($color-white, $color, $percent);
+}
+
+// Darken a color by mixing with $color-black
+@function mix-with-dark($color, $percent) {
+  @return color.mix($color-black, $color, $percent);
+}
+
+// Create a 50..900 stepped scale for a single brand color
+@function create-color-scale($base-color) {
+  $adjusted-base: color.scale(
+    $base-color,
+    $saturation: 6%
+  ); // slight saturation boost
+
+  @return (
+    50: mix-with-light($adjusted-base, 92%),
+    100: mix-with-light($adjusted-base, 84%),
+    200: mix-with-light($adjusted-base, 72%),
+    300: mix-with-light($adjusted-base, 56%),
+    400: mix-with-light($adjusted-base, 36%),
+    500: $adjusted-base,
+    600: mix-with-dark($adjusted-base, 10%),
+    700: mix-with-dark($adjusted-base, 18%),
+    800: mix-with-dark($adjusted-base, 28%),
+    900: mix-with-dark($adjusted-base, 40%)
+  );
+}
+
+// Build a neutral 0..1000 scale between two endpoints
+@function create-neutral-scale($light-end, $dark-end) {
+  $steps: 0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000;
+  $scale: ();
+
+  @for $i from 1 through list.length($steps) {
+    $step: list.nth($steps, $i);
+    $ratio: calc($step / 1000); // normalized 0..1
+    $mixed: color.mix($light-end, $dark-end, (1 - $ratio) * 100%);
+    $scale: map.merge(
+      $scale,
+      (
+        $step: $mixed,
+      )
+    );
+  }
+
+  @return $scale;
+}
+
+// -----------------------------------------------------------------------------
+// MIXINS TO EMIT VARIABLES
+// -----------------------------------------------------------------------------
+
+// Emit scale values as CSS variables like --color-primary-50 ... --color-primary-900
+@mixin output-color-scale-vars($name, $scale) {
+  @each $step, $value in $scale {
+    --color-#{$name}-#{$step}: #{$value};
+  }
+}
+
+// Emit neutral scale values as CSS variables like --color-neutral-0 ... --color-neutral-1000
+@mixin output-neutral-scale-vars($scale) {
+  @each $step, $value in $scale {
+    --color-neutral-#{$step}: #{$value};
+  }
+}
+
+// Map scale indexes to role-based tokens (main, light, dark)
+@mixin output-role-mapping(
+  $role,
+  $light-main,
+  $light-light,
+  $light-dark,
+  $dark-main,
+  $dark-light,
+  $dark-dark
+) {
+  --#{$role}-main-light: var(--color-#{$role}-#{$light-main});
+  --#{$role}-light-light: var(--color-#{$role}-#{$light-light});
+  --#{$role}-dark-light: var(--color-#{$role}-#{$light-dark});
+
+  --#{$role}-main-dark: var(--color-#{$role}-#{$dark-main});
+  --#{$role}-light-dark: var(--color-#{$role}-#{$dark-light});
+  --#{$role}-dark-dark: var(--color-#{$role}-#{$dark-dark});
+}
+
+// Emit feedback role tokens (error, warning, info, success)
+@mixin output-feedback-role-vars($role, $scale, $light-main, $dark-main) {
+  --#{$role}-main-light: var(--color-#{$role}-#{$light-main});
+  --#{$role}-contrast-light: #{$color-white};
+  --#{$role}-main-dark: var(--color-#{$role}-#{$dark-main});
+  --#{$role}-contrast-dark: #{$color-black};
+}
+
+// -----------------------------------------------------------------------------
+// MAIN THEME GENERATOR
+// -----------------------------------------------------------------------------
+
+/// @param $palette map like:
+/// (
+///   primary:   #1976d2,
+///   secondary: #7b1fa2,
+///   error:     #d32f2f,
+///   warning:   #ffa000,
+///   info:      #1976d2,
+///   success:   #388e3c,
+/// )
+/// @param $scope selector to scope variables (default :root)
+@mixin generate-theme($palette, $scope: ":root") {
+  #{$scope} {
+    // Generate full scales for each role color
+    $primary-scale: create-color-scale(map.get($palette, primary));
+    $secondary-scale: create-color-scale(map.get($palette, secondary));
+    $error-scale: create-color-scale(map.get($palette, error));
+    $warning-scale: create-color-scale(map.get($palette, warning));
+    $info-scale: create-color-scale(map.get($palette, info));
+    $success-scale: create-color-scale(map.get($palette, success));
+
+    @include output-color-scale-vars(primary, $primary-scale);
+    @include output-color-scale-vars(secondary, $secondary-scale);
+    @include output-color-scale-vars(error, $error-scale);
+    @include output-color-scale-vars(warning, $warning-scale);
+    @include output-color-scale-vars(info, $info-scale);
+    @include output-color-scale-vars(success, $success-scale);
+
+    // Role mappings (scale → role tokens)
+    // Light uses 300/500/700, Dark uses 200/400/600
+    @include output-role-mapping(primary, 500, 300, 700, 400, 200, 600);
+    @include output-role-mapping(secondary, 500, 300, 700, 400, 200, 600);
+
+    // Feedback roles
+    @include output-feedback-role-vars(error, $error-scale, 700, 300);
+    @include output-feedback-role-vars(warning, $warning-scale, 700, 300);
+    @include output-feedback-role-vars(info, $info-scale, 700, 300);
+    @include output-feedback-role-vars(success, $success-scale, 700, 300);
+  }
+
+  // Theme-specific mappings + neutrals
+  #{$scope}[data-theme="light"] {
+    $neutral-light-scale: create-neutral-scale($color-white, $color-black);
+    @include output-neutral-scale-vars($neutral-light-scale);
+
+    --surface-bg: var(--color-neutral-50);
+    --surface-paper: var(--color-neutral-0);
+    --surface-border: var(--color-neutral-300);
+    --surface-border-dark: var(--color-neutral-600);
+    --divider: rgba(var(--color-neutral-1000), 0.12);
+    --text-primary: rgba(var(--color-neutral-1000), 0.87);
+    --text-secondary: rgba(var(--color-neutral-1000), 0.6);
+    --text-disabled: rgba(var(--color-neutral-1000), 0.38);
+
+    --color-primary-main: var(--primary-main-light);
+    --color-primary-light: var(--primary-light-light);
+    --color-primary-dark: var(--primary-dark-light);
+    --color-primary-contrast: #{$color-white};
+
+    --color-secondary-main: var(--secondary-main-light);
+    --color-secondary-light: var(--secondary-light-light);
+    --color-secondary-dark: var(--secondary-dark-light);
+    --color-secondary-contrast: #{$color-white};
+
+    --color-error-main: var(--error-main-light);
+    --color-error-light: var(--color-error-500);
+    --color-error-contrast: #{$color-white};
+
+    --color-warning-main: var(--warning-main-light);
+    --color-warning-light: var(--color-warning-500);
+    --color-warning-contrast: #{$color-black};
+
+    --color-info-main: var(--info-main-light);
+    --color-info-light: var(--color-info-500);
+    --color-info-contrast: #{$color-white};
+
+    --color-success-main: var(--success-main-light);
+    --color-success-light: var(--color-success-500);
+    --color-success-contrast: #{$color-white};
+  }
+
+  #{$scope}[data-theme="dark"] {
+    $neutral-dark-scale: create-neutral-scale($color-black, $color-white);
+    @include output-neutral-scale-vars($neutral-dark-scale);
+
+    --surface-bg: var(--color-neutral-50);
+    --surface-paper: var(--color-neutral-0);
+    --surface-border: var(--color-neutral-300);
+    --surface-border-dark: var(--color-neutral-600);
+    --divider: rgba(var(--color-neutral-1000), 0.12);
+    --text-primary: rgba(var(--color-neutral-1000), 0.87);
+    --text-secondary: rgba(var(--color-neutral-1000), 0.6);
+    --text-disabled: rgba(var(--color-neutral-1000), 0.38);
+
+    --color-primary-main: var(--primary-main-dark);
+    --color-primary-light: var(--primary-light-dark);
+    --color-primary-dark: var(--primary-dark-dark);
+    --color-primary-contrast: #{$color-black};
+
+    --color-secondary-main: var(--secondary-main-dark);
+    --color-secondary-light: var(--secondary-light-dark);
+    --color-secondary-dark: var(--secondary-dark-dark);
+    --color-secondary-contrast: #{$color-black};
+
+    --color-error-main: var(--error-main-dark);
+    --color-error-light: var(--color-error-200);
+    --color-error-contrast: #{$color-black};
+
+    --color-warning-main: var(--warning-main-dark);
+    --color-warning-light: var(--color-warning-200);
+    --color-warning-contrast: #{$color-black};
+
+    --color-info-main: var(--info-main-dark);
+    --color-info-light: var(--color-info-200);
+    --color-info-contrast: #{$color-black};
+
+    --color-success-main: var(--success-main-dark);
+    --color-success-light: var(--color-success-200);
+    --color-success-contrast: #{$color-black};
+  }
+}
+
+@include generate-theme(
+  (
+    primary: #1976d2,
+    secondary: #7b1fa2,
+    error: #d32f2f,
+    warning: #ffa000,
+    info: #1976d2,
+    success: #388e3c,
+  )
+);
+
+// -----------------------------------------------------------------------------
+// THEME VARIATIONS
+// Drop this file into your project and swap which @include generate-theme block
+// you want active. Each block uses your generate-theme() mixin with different bases.
+// -----------------------------------------------------------------------------
+
+// === 1. Sunset Glow ===
+// Warm oranges, corals, and teals. Energetic and vibrant.
+@include generate-theme(
+  (
+    primary: #ff7043,
+    secondary: #f06292,
+    error: #e53935,
+    warning: #fb8c00,
+    info: #26c6da,
+    success: #43a047,
+  ),
+  ':root[data-color-scheme="sunset"]'
+);
+
+// === 2. Nordic Calm ===
+// Cool blues, muted purples, and frosty neutrals. Inspired by Nord theme.
+@include generate-theme(
+  (
+    primary: #5e81ac,
+    secondary: #b48ead,
+    error: #bf616a,
+    warning: #ebcb8b,
+    info: #81a1c1,
+    success: #a3be8c,
+  ),
+  ':root[data-color-scheme="nordic"]'
+);
+
+// === 3. Retro Arcade ===
+// Punchy neon accents on dark. 80s / vaporwave vibe.
+@include generate-theme(
+  (
+    primary: #ff6ec7,
+    secondary: #8b5cf6,
+    error: #ff1744,
+    warning: #ffea00,
+    info: #00e5ff,
+    success: #69f0ae,
+  ),
+  ':root[data-color-scheme="arcade"]'
+);
+
+// === 4. Earth & Stone ===
+// Natural greens, browns, and clay tones. Cozy & organic.
+@include generate-theme(
+  (
+    primary: #ac665f,
+    secondary: #8d6e63,
+    error: #b71c1c,
+    warning: #f57f17,
+    info: #455a64,
+    success: #2e7d32,
+  ),
+  ':root[data-color-scheme="earth"]'
+);
+
+// === 5. Ocean Breeze ===
+// Aqua, turquoise, and sandy accents. Light, airy, beachy.
+@include generate-theme(
+  (
+    primary: #0097a7,
+    secondary: #00acc1,
+    error: #d32f2f,
+    warning: #ffb300,
+    info: #0288d1,
+    success: #00796b,
+  ),
+  ':root[data-color-scheme="ocean"]'
+);

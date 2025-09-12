@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { ButtonGroup } from "@components";
+import type { ButtonGroupOption } from "../actions/button-group/button.group.types";
+import { localStorageKeys, ROOT } from "@/helpers/consts";
 
 type ThemePref = "light" | "dark" | "system";
 
 export const ThemeSwitcher = () => {
   const [theme, setTheme] = useState<ThemePref>(() => {
-    return (localStorage.getItem("theme") as ThemePref) || "system";
+    return (
+      (localStorage.getItem(localStorageKeys.MODE_KEY) as ThemePref) || "system"
+    );
   });
 
   useEffect(() => {
-    const root = document.documentElement;
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
 
     const resolve = (p: ThemePref) =>
@@ -17,9 +20,9 @@ export const ThemeSwitcher = () => {
 
     const apply = () => {
       const resolved = resolve(theme);
-      root.setAttribute("data-theme", resolved);
-      root.style.colorScheme = resolved;
-      localStorage.setItem("theme", theme);
+      ROOT.setAttribute("data-theme", resolved);
+      ROOT.style.colorScheme = resolved;
+      localStorage.setItem(localStorageKeys.MODE_KEY, theme);
     };
 
     apply();
@@ -29,11 +32,30 @@ export const ThemeSwitcher = () => {
     }
   }, [theme]);
 
+  const themes: ButtonGroupOption[] = [
+    {
+      key: "light",
+      label: "Light",
+      default: theme === "light",
+    },
+    {
+      key: "dark",
+      label: "Dark",
+      default: theme === "dark",
+    },
+    {
+      key: "system",
+      label: "System",
+      default: theme === "system",
+    },
+  ];
+
   return (
-    <ButtonGroup value={theme} onChange={(v) => setTheme(v as ThemePref)}>
-      <ButtonGroup.Button value="light">Light</ButtonGroup.Button>
-      <ButtonGroup.Button value="dark">Dark</ButtonGroup.Button>
-      <ButtonGroup.Button value="system">System</ButtonGroup.Button>
-    </ButtonGroup>
+    <ButtonGroup
+      role="primarylight"
+      options={themes}
+      name={"mode"}
+      onSelected={(v) => setTheme(v.key as ThemePref)}
+    ></ButtonGroup>
   );
 };

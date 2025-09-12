@@ -1,1 +1,1 @@
-export { Font } from "./font.component";
+export { Label } from "./font.component";

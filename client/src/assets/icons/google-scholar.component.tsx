@@ -1,0 +1,61 @@
+import React, { useRef } from "react";
+
+import { StyledIcon } from "./shared/icon.styled";
+import type { IconProps } from "./shared/icon.types";
+import type { MickeyObject } from "@/helpers/types/base.types";
+import type { Dimensions } from "@/helpers/types/style.types";
+import { usePointerEvent } from "@/helpers/hooks/usePointerEvent.hook";
+import { removeUndefined } from "@/helpers/objects";
+
+export const GoogleScholarIcon: React.FC<
+  IconProps & { type: "brands" | Dimensions }
+> = ({ type, size, color, active, className, style, ...more }) => {
+  const domRef: MickeyObject = useRef(null);
+
+  const { onPress, onOut, onMove, onUp, onDown, onOver, groupId } = more;
+  const pointerEvents = {
+    onPress,
+    onOut,
+    onMove,
+    onUp,
+    onDown,
+    onOver,
+    groupId,
+  };
+
+  usePointerEvent({ element: domRef, active: active, ...pointerEvents });
+
+  const internalProperties = removeUndefined({
+    className,
+    style: { ...(style || {}) },
+    active,
+    size,
+    color,
+  });
+
+  return (
+    <StyledIcon ref={domRef} {...internalProperties}>
+      {(() => {
+        switch (type) {
+          case "brands":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-foreground"
+                  d="M390.9 298.5s0 .1.1.1c9.2 19.4 14.4 41.1 14.4 64C405.3 445.1 338.5 512 256 512s-149.3-66.9-149.3-149.3c0-22.9 5.2-44.6 14.4-64 1.7-3.6 3.6-7.2 5.6-10.7q6.6-11.4 15-21.3c27.4-32.6 68.5-53.3 114.4-53.3 33.6 0 64.6 11.1 89.6 29.9 9.1 6.9 17.4 14.7 24.8 23.5 5.6 6.6 10.6 13.8 15 21.3 2 3.4 3.8 7 5.5 10.5zm26.4-18.8c-30.1-58.4-91-98.4-161.3-98.4s-131.2 40-161.3 98.4L0 202.7 256 0l256 202.7-94.7 77.1z"
+                />
+              </svg>
+            );
+
+          default:
+            return null;
+        }
+      })()}
+    </StyledIcon>
+  );
+};

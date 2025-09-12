@@ -1,0 +1,61 @@
+import React, { useRef } from "react";
+
+import { StyledIcon } from "./shared/icon.styled";
+import type { IconProps } from "./shared/icon.types";
+import type { MickeyObject } from "@/helpers/types/base.types";
+import type { Dimensions } from "@/helpers/types/style.types";
+import { usePointerEvent } from "@/helpers/hooks/usePointerEvent.hook";
+import { removeUndefined } from "@/helpers/objects";
+
+export const AppStoreIosIcon: React.FC<
+  IconProps & { type: "brands" | Dimensions }
+> = ({ type, size, color, active, className, style, ...more }) => {
+  const domRef: MickeyObject = useRef(null);
+
+  const { onPress, onOut, onMove, onUp, onDown, onOver, groupId } = more;
+  const pointerEvents = {
+    onPress,
+    onOut,
+    onMove,
+    onUp,
+    onDown,
+    onOver,
+    groupId,
+  };
+
+  usePointerEvent({ element: domRef, active: active, ...pointerEvents });
+
+  const internalProperties = removeUndefined({
+    className,
+    style: { ...(style || {}) },
+    active,
+    size,
+    color,
+  });
+
+  return (
+    <StyledIcon ref={domRef} {...internalProperties}>
+      {(() => {
+        switch (type) {
+          case "brands":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 448 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-foreground"
+                  d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48M127 384.5c-5.5 9.6-17.8 12.8-27.3 7.3-9.6-5.5-12.8-17.8-7.3-27.3l14.3-24.7q24.15-7.35 39.6 11.4zm138.9-53.9H84c-11 0-20-9-20-20s9-20 20-20h51l65.4-113.2-20.5-35.4c-5.5-9.6-2.2-21.8 7.3-27.3 9.6-5.5 21.8-2.2 27.3 7.3l8.9 15.4 8.9-15.4c5.5-9.6 17.8-12.8 27.3-7.3 9.6 5.5 12.8 17.8 7.3 27.3l-85.8 148.6h62.1c20.2 0 31.5 23.7 22.7 40m98.1 0h-29l19.6 33.9c5.5 9.6 2.2 21.8-7.3 27.3-9.6 5.5-21.8 2.2-27.3-7.3-32.9-56.9-57.5-99.7-74-128.1-16.7-29-4.8-58 7.1-67.8 13.1 22.7 32.7 56.7 58.9 102h52c11 0 20 9 20 20 0 11.1-9 20-20 20"
+                />
+              </svg>
+            );
+
+          default:
+            return null;
+        }
+      })()}
+    </StyledIcon>
+  );
+};

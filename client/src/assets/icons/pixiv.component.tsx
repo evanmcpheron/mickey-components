@@ -1,0 +1,61 @@
+import React, { useRef } from "react";
+
+import { StyledIcon } from "./shared/icon.styled";
+import type { IconProps } from "./shared/icon.types";
+import type { MickeyObject } from "@/helpers/types/base.types";
+import type { Dimensions } from "@/helpers/types/style.types";
+import { usePointerEvent } from "@/helpers/hooks/usePointerEvent.hook";
+import { removeUndefined } from "@/helpers/objects";
+
+export const PixivIcon: React.FC<
+  IconProps & { type: "brands" | Dimensions }
+> = ({ type, size, color, active, className, style, ...more }) => {
+  const domRef: MickeyObject = useRef(null);
+
+  const { onPress, onOut, onMove, onUp, onDown, onOver, groupId } = more;
+  const pointerEvents = {
+    onPress,
+    onOut,
+    onMove,
+    onUp,
+    onDown,
+    onOver,
+    groupId,
+  };
+
+  usePointerEvent({ element: domRef, active: active, ...pointerEvents });
+
+  const internalProperties = removeUndefined({
+    className,
+    style: { ...(style || {}) },
+    active,
+    size,
+    color,
+  });
+
+  return (
+    <StyledIcon ref={domRef} {...internalProperties}>
+      {(() => {
+        switch (type) {
+          case "brands":
+            return (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 448 512"
+                className="aps-icon-svg"
+                fill={color}
+              >
+                <path
+                  className="aps-icon-foreground"
+                  d="M64 32C28.7 32 0 60.7 0 96v320c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64zm171.5 84c41 0 76.3 12.9 101.4 35.2 25.2 22.2 39.8 54.1 39.8 88.8.1 35.3-16.6 66.3-42.4 87-25.9 20.8-60.6 32.4-98.8 32.4-43.5 0-83.8-16.1-83.8-16.1v51.8c7.4 2.2 19.7 7 11.9 14.8h-58.8c-7.7-7.8 3.6-12.4 12.1-14.8V175.5c-19.8 15.4-29.9 28.8-35.1 38.7 6 19.4-5.3 18.5-5.3 18.5l-20.5-33S128.7 116 235.5 116m-3.6 222.9c30 0 56-11.3 73.9-29.2 17.9-18.1 27.9-41.6 28-70.2-.1-29.3-9.5-54.6-26.7-73.6-17.2-18.9-42.7-31.3-75.2-31.4-26.7-.1-59.8 9-80.2 23.7v164.9c18.6 9.3 46.8 15.9 80.2 15.8"
+                />
+              </svg>
+            );
+
+          default:
+            return null;
+        }
+      })()}
+    </StyledIcon>
+  );
+};

@@ -1,10 +1,11 @@
-import { Font } from "@/components/font";
+import { Label } from "@/components/font";
 import {
   StyledCard,
   StyledCardBody,
   StyledCardFooter,
   StyledCardHeader,
 } from "./card.styled";
+import { styles } from "@/helpers";
 
 export type CardVariant = "elevated" | "outlined" | "plain";
 
@@ -38,7 +39,7 @@ export const Card = ({
   elevation,
   padding = 1,
   radius = "md",
-  fullWidth = false,
+  fullWidth = true,
   hoverable = false,
   header,
   body,
@@ -52,31 +53,25 @@ export const Card = ({
       padding={padding}
       radius={radius}
       fullWidth={fullWidth}
-      hoverable={hoverable}
+      {...(hoverable && { hoverable: true })}
       {...rest}
     >
       {header && (
         <StyledCardHeader>
-          {header?.primary && (
-            <Font variant="h5" weight={500} uppercase>
-              {header.primary}
-            </Font>
-          )}
+          {header?.primary && <Label fontType="h4">{header.primary}</Label>}
           {header?.secondary && (
-            <Font variant="body2" tone="primary">
-              {header.secondary}
-            </Font>
+            <Label color={styles.color.primary.main}>{header.secondary}</Label>
           )}
         </StyledCardHeader>
       )}
       {body && (
         <StyledCardBody>
-          <Font variant="body1">{body}</Font>
+          <Label style={{ width: "100%" }}>{body}</Label>
         </StyledCardBody>
       )}
       {footer && (
         <StyledCardFooter>
-          <Font variant="body1">{footer}</Font>
+          <Label style={{ width: "100%" }}>{footer}</Label>
         </StyledCardFooter>
       )}
     </StyledCard>

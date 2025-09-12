@@ -1,5 +1,6 @@
 import { type CSSProperties } from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GenericMickeyObject = Record<string, any> | any | undefined;
 export type MickeyObject<T = GenericMickeyObject> =
   | Record<string, T>
@@ -21,4 +22,5 @@ export interface ClickActions {
   groupId?: string;
   active?: boolean;
   selected?: boolean;
+  disabled?: boolean;
 }
